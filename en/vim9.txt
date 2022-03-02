@@ -1,17 +1,14 @@
-*vim9.txt*	For Vim version 8.2.  Last change: 2021 Mar 03
+*vim9.txt*	For Vim version 8.2.  Last change: 2022 Feb 23
 
 
 		  VIM REFERENCE MANUAL	  by Bram Moolenaar
 
-
-THIS IS STILL UNDER DEVELOPMENT - ANYTHING CAN BREAK - ANYTHING CAN CHANGE
 
 Vim9 script commands and expressions.			*Vim9* *vim9*
 
 Most expression help is in |eval.txt|.  This file is about the new syntax and
 features in Vim9 script.
 
-THIS IS STILL UNDER DEVELOPMENT - ANYTHING CAN BREAK - ANYTHING CAN CHANGE
 
 
 1.  What is Vim9 script?		|Vim9-script|
@@ -26,8 +23,6 @@ THIS IS STILL UNDER DEVELOPMENT - ANYTHING CAN BREAK - ANYTHING CAN CHANGE
 ==============================================================================
 
 1. What is Vim9 script?					*Vim9-script*
-
-THIS IS STILL UNDER DEVELOPMENT - ANYTHING CAN BREAK - ANYTHING CAN CHANGE
 
 Vim script has been growing over time, while preserving backwards
 compatibility.  That means bad choices from the past often can't be changed
@@ -61,20 +56,23 @@ Vim9 script and legacy Vim script can be mixed.  There is no requirement to
 rewrite old scripts, they keep working as before.  You may want to use a few
 `:def` functions for code that needs to be fast.
 
-						*:vim9* *:vim9cmd*
-:vim9[cmd] {cmd}
-		Execute {cmd} using Vim9 script syntax and semantics.
-		Useful when typing a command and in a legacy script or
-		function.
+:vim9[cmd] {cmd}				*:vim9* *:vim9cmd* *E1164*
+		Evaluate and execute {cmd} using Vim9 script syntax and
+		semantics.  Useful when typing a command and in a legacy
+		script or function.
+
+:leg[acy] {cmd}					*:leg* *:legacy* *E1189* *E1234*
+		Evaluate and execute {cmd} using legacy script syntax and
+		semantics.  Only useful in a Vim9 script or a :def function.
+		Note that {cmd} cannot use local variables, since it is parsed
+		with legacy expression syntax.
 
 ==============================================================================
 
 2. Differences from legacy Vim script			*vim9-differences*
 
-THIS IS STILL UNDER DEVELOPMENT - ANYTHING CAN BREAK - ANYTHING CAN CHANGE
-
 Overview ~
-
+							*E1146*
 Brief summary of the differences you will most often encounter when using Vim9
 script and `:def` functions; details are below:
 - Comments start with #, not ": >
@@ -83,8 +81,8 @@ script and `:def` functions; details are below:
 	echo "hello "
 	     .. yourName
 	     .. ", how are you?"
-- White space is required in many places.
-- Assign values without `:let`, declare variables with `:var`: >
+- White space is required in many places to improve readability.
+- Assign values without `:let` *E1126* , declare variables with `:var`: >
 	var count = 0
 	count += 3
 - Constants can be declared with `:final` and `:const`: >
@@ -96,11 +94,17 @@ script and `:def` functions; details are below:
 	def CallMe(count: number, message: string): bool
 - Call functions without `:call`: >
 	writefile(['done'], 'file.txt')
-- You cannot use `:xit`, `:t`, `:k`, `:append`, `:change`, `:insert`, `:open`
-  or curly-braces names.
+- You cannot use old Ex commands `:xit`, `:t`, `:k`, `:append`, `:change`,
+  `:insert`, `:open`, and `:s` or `:d` with only flags.
+- You cannot use curly-braces names.
 - A range before a command must be prefixed with a colon: >
 	:%s/this/that
+- Executing a register with "@r" does not work, you can prepend a colon or use
+  `:exe`: >
+  	:exe @a
 - Unless mentioned specifically, the highest |scriptversion| is used.
+- When defining an expression mapping, the expression will be evaluated in the
+  context of the script where it was defined.
 
 
 Comments starting with # ~
@@ -118,7 +122,7 @@ is the same as in shell scripts and Python programs.
 
 In Vi # is a command to list text with numbers.  In Vim9 script you can use
 `:number` for that. >
-	101 number
+	:101 number
 
 To improve readability there must be a space between a command and the #
 that starts a comment: >
